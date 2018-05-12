@@ -7,7 +7,7 @@ package object lexers {
 
   object SQLLexer extends RegexParsers {
 
-    override val whiteSpace = """[\s;]+""".r
+    override val whiteSpace = """[\s\n;]+""".r
 
     def select: Parser[SELECT.type] = "select" ^^ (_ => SELECT)
     def name: Parser[NAME] = """[a-z_]+\.?[a-z_]*,?""".r ^^ (name => NAME(name.stripSuffix(",")))

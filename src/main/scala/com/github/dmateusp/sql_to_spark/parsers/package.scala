@@ -24,14 +24,13 @@ package object parsers {
       (FROM ~ tableName) ^^ { case _ ~ t => From(t)}
     }
 
-
     def select: Parser[Select] =
-      (SELECT ~ columns) ^^ { case _ ~ cols => Select(cols) }
+      (SELECT ~ columns ~ from) ^^ { case _ ~ cols ~ f => Select(cols, f) }
 
     def statement: Parser[StatementAst] =
-      phrase(select ~ from ^^ { case s ~ f => StatementAst(List(s, f)) })
+      phrase(select ^^ { case s => StatementAst(s) })
 
-    def apply(tokens: Seq[SQLToken]): Either[ParserError, StatementAst] = {
+    def apply(tokens: Iterable[SQLToken]): Either[ParserError, StatementAst] = {
       val reader = new SQLReader(tokens)
       statement(reader) match {
         case NoSuccess(msg, _) => Left(ParserError(msg))
@@ -40,7 +39,7 @@ package object parsers {
     }
   }
 
-  class SQLReader(tokens: Seq[SQLToken]) extends Reader[SQLToken] {
+  class SQLReader(tokens: Iterable[SQLToken]) extends Reader[SQLToken] {
     override def first: SQLToken = tokens.head
     override def atEnd: Boolean = tokens.isEmpty
     override def pos: Position = NoPosition

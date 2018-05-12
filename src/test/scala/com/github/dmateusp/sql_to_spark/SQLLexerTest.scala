@@ -5,7 +5,7 @@ import com.github.dmateusp.sql_to_spark.tokens._
 
 import org.scalatest.{FlatSpec, Matchers}
 
-class LexerTest extends FlatSpec with Matchers {
+class SQLLexerTest extends FlatSpec with Matchers {
 
   "simple select * statement" should "generate correct tokens" in {
     val input =
