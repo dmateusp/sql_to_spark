@@ -7,15 +7,13 @@ import org.scalatest.{FlatSpec, Matchers}
 
 class LexerTest extends FlatSpec with Matchers {
 
-  val lexer = new SQLLexer()
-
   "simple select * statement" should "generate correct tokens" in {
     val input =
       """
         |select * from dw.table;
       """.stripMargin
 
-    val output = lexer.parse(lexer.tokens, input).get
+    val output = SQLLexer.parse(SQLLexer.tokens, input).get
 
     val expected = List[SQLToken](SELECT, STAR, FROM, NAME("dw.table"))
 
@@ -31,7 +29,7 @@ class LexerTest extends FlatSpec with Matchers {
         |  from dw.table;
       """.stripMargin
 
-    val output = lexer.parse(lexer.tokens, input).get
+    val output = SQLLexer.parse(SQLLexer.tokens, input).get
 
     val expected = List[SQLToken](SELECT, NAME("dw_batch_id"), NAME("ad_id"), FROM, NAME("dw.table"))
 
@@ -47,7 +45,7 @@ class LexerTest extends FlatSpec with Matchers {
         |  from dw.table;
       """.stripMargin
 
-    val output = lexer.parse(lexer.tokens, input).get
+    val output = SQLLexer.parse(SQLLexer.tokens, input).get
 
     val expected = List[SQLToken](SELECT, NAME("dw_batch_id"), AS, NAME("id_batch"), NAME("ad_id"), FROM, NAME("dw.table"))
 

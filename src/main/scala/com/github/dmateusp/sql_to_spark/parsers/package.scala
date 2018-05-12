@@ -1,23 +1,43 @@
 package com.github.dmateusp.sql_to_spark
 
 import com.github.dmateusp.sql_to_spark.asts._
+import com.github.dmateusp.sql_to_spark.errors.ParserError
 import com.github.dmateusp.sql_to_spark.tokens._
 
 import scala.util.parsing.combinator.Parsers
 import scala.util.parsing.input.{NoPosition, Position, Reader}
 
 package object parsers {
+
   object SQLParser extends Parsers {
+
     override type Elem = SQLToken
 
-    def columns: Parser[List[Column]] = {
+    def columns: Parser[List[SelectElem]] = {
       val star = STAR ^^ (_ => List(Star))
-      val columnName: Parser[Name] = accept("column name", { case NAME(name) => Name(name) })
+      val columnName: Parser[Column] = accept("column name", { case NAME(name) => Column(name) })
       star | columnName.+
     }
 
-    def selectStatement: Parser[Select] =
-      (SELECT ~ columns) ^^ { case _ ~ columns => Select(columns) }
+    def from: Parser[From] = {
+      val tableName: Parser[Table] = accept("table name", { case NAME(name) => Table(name) })
+      (FROM ~ tableName) ^^ { case _ ~ t => From(t)}
+    }
+
+
+    def select: Parser[Select] =
+      (SELECT ~ columns) ^^ { case _ ~ cols => Select(cols) }
+
+    def statement: Parser[StatementAst] =
+      phrase(select ~ from ^^ { case s ~ f => StatementAst(List(s, f)) })
+
+    def apply(tokens: Seq[SQLToken]): Either[ParserError, StatementAst] = {
+      val reader = new SQLReader(tokens)
+      statement(reader) match {
+        case NoSuccess(msg, _) => Left(ParserError(msg))
+        case Success(result, _) => Right(result)
+      }
+    }
   }
 
   class SQLReader(tokens: Seq[SQLToken]) extends Reader[SQLToken] {
@@ -26,4 +46,5 @@ package object parsers {
     override def pos: Position = NoPosition
     override def rest: Reader[SQLToken] = new SQLReader(tokens.tail)
   }
+
 }

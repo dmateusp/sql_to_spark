@@ -1,13 +1,20 @@
 package com.github.dmateusp.sql_to_spark
 
 package object asts {
-  sealed trait SQLAst
-  case class From(from: FromElement)
 
-  sealed trait FromElement extends SQLAst
-  case class Select(columns: List[Column]) extends FromElement
+  case class StatementAst(elems: List[StatementElem])
 
-  sealed trait Column extends SQLAst
-  case class Name(name: String) extends Column
-  case object Star extends Column
+  sealed trait StatementElem
+
+  case class Select(columns: List[SelectElem]) extends StatementElem with FromElem
+
+  sealed trait SelectElem
+  case class Column(name: String) extends SelectElem
+  case object Star extends SelectElem
+
+  case class From(from: FromElem) extends StatementElem
+
+  sealed trait FromElem
+  case class Table(name: String) extends FromElem
+
 }
