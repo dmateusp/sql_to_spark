@@ -18,13 +18,14 @@ class TranslatorDataFrameTest extends FlatSpec with Matchers {
     val output = DataFrameTranslator.translate(input)
 
     val expected =
-      s"""
-         |// DF: dw.temp
+      s"""spark
+         |  .read
+         |  // TODO: add source for dw.temp
          |  .select(
-         |    col(*)
+         |    col("*")
          |  )
        """.stripMargin
 
-    expected.trim shouldBe output.trim
+    expected.lines.map(_.trim).mkString shouldBe output.lines.map(_.trim).mkString
   }
 }

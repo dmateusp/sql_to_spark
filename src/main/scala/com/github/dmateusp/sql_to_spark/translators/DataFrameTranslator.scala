@@ -1,6 +1,8 @@
 package com.github.dmateusp.sql_to_spark.translators
 
 import com.github.dmateusp.sql_to_spark.asts._
+import com.github.dmateusp.sql_to_spark.helpers.indentation.Indent
+import com.github.dmateusp.sql_to_spark.helpers.todo.TODO
 
 object DataFrameTranslator extends StatementAstTranslator {
 
@@ -11,17 +13,21 @@ object DataFrameTranslator extends StatementAstTranslator {
 
   def translateSelect: PartialFunction[Select, String] = {
     case Select(selectElems, From(Table(t))) =>
-      s"""
-         |// DF: $t
-         |  .select(
-         |    ${selectElems.map(translateSelectElem).mkString(",\n")}
-         |  )
+      "spark" +
+      Indent(
+        s"""
+         |.read
+         |${TODO(s"add source for $t")}
+         |.select(
+         |${Indent(selectElems.map(translateSelectElem).mkString(s",\n"))}
+         |)
          """.stripMargin
+      )
   }
 
   def translateSelectElem: PartialFunction[SelectElem, String] = {
-    case Column(c) => s"col($c)"
-    case Star => "col(*)"
+    case Column(c) => s"""col("$c")"""
+    case Star => """col("*")"""
   }
 
 }
