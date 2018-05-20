@@ -16,7 +16,8 @@ package object parsers {
     def columns: Parser[List[SelectElem]] = {
       val star = STAR ^^ (_ => List(Star))
       val columnName: Parser[Column] = accept("column name", { case NAME(name) => Column(name) })
-      star | columnName.+
+      val columnRename: Parser[Column] = (columnName ~ AS ~ columnName) ^^ { case Column(name, _) ~ _ ~ Column(rename, _) => Column(name, Some(rename)) }
+      star | (columnRename | columnName).+
     }
 
     def from: Parser[From] = {

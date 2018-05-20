@@ -20,4 +20,32 @@ class SQLParserTest extends FlatSpec with Matchers {
 
     Right(expected) shouldBe SQLParser(input)
   }
+
+  "select 'column name' statement" should "be parsed" in {
+    val input: List[SQLToken] = List(SELECT, NAME("user_id"), NAME("uuid"), FROM, NAME("dw.temp"))
+    val expected: StatementAst = StatementAst(
+      Select(
+        List(Column("user_id"), Column("uuid")),
+        From(
+          Table("dw.temp")
+        )
+      )
+    )
+
+    Right(expected) shouldBe SQLParser(input)
+  }
+
+  "select 'column rename' statement" should "be parsed" in {
+    val input: List[SQLToken] = List(SELECT, NAME("user_id"), AS, NAME("id"), FROM, NAME("dw.temp"))
+    val expected: StatementAst = StatementAst(
+      Select(
+        List(Column("user_id", Some("id"))),
+        From(
+          Table("dw.temp")
+        )
+      )
+    )
+
+    Right(expected) shouldBe SQLParser(input)
+  }
 }

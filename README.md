@@ -14,6 +14,20 @@ The process of translating SQL scripts to their DataFrame equivalent can be repe
 sbt 'run path/to/sql_script.sql'
 ```
 
+## Support matrix
+
+### SELECT
+
+| ANSI SQL        | supported |
+| --------------- | --------- |
+| column name     | [X]       |
+| column rename   | [X]       |
+| type cast       | [ ]       |
+| literal         | [ ]       |
+| custom function | [ ]       |
+| joins           | [ ]       |
+| nested select   | [ ]       |
+
 ## Example
 
 ```sql

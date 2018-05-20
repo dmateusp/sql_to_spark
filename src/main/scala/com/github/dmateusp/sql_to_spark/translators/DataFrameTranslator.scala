@@ -26,7 +26,8 @@ object DataFrameTranslator extends StatementAstTranslator {
   }
 
   def translateSelectElem: PartialFunction[SelectElem, String] = {
-    case Column(c) => s"""col("$c")"""
+    case Column(c, Some(rename)) => s"""col("$c").as("$rename")"""
+    case Column(c, _) => s"""col("$c")"""
     case Star => """col("*")"""
   }
 

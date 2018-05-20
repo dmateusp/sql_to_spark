@@ -1,1 +1,2 @@
-select * from dw.table;
+select *
+from dw.table;
