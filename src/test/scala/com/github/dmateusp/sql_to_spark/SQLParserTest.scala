@@ -39,7 +39,7 @@ class SQLParserTest extends FlatSpec with Matchers {
     val input: List[SQLToken] = List(SELECT, NAME("user_id"), AS, NAME("id"), FROM, NAME("dw.temp"))
     val expected: StatementAst = StatementAst(
       Select(
-        List(Column("user_id", Some("id"))),
+        List(Renamed(Column("user_id"), "id")),
         From(
           Table("dw.temp")
         )

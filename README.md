@@ -21,9 +21,13 @@ sbt 'run path/to/sql_script.sql'
 | ANSI SQL        | supported |
 | --------------- | --------- |
 | column name     | [X]       |
+| star            | [X]       |
 | column rename   | [X]       |
+| from            | [X]       |
+| inline comments | [ ]       |
 | type cast       | [ ]       |
 | literal         | [ ]       |
+| typed literal   | [X]       |
 | custom function | [ ]       |
 | joins           | [ ]       |
 | nested select   | [ ]       |

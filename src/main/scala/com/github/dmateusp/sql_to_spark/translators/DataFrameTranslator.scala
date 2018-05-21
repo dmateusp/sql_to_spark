@@ -26,9 +26,21 @@ object DataFrameTranslator extends StatementAstTranslator {
   }
 
   def translateSelectElem: PartialFunction[SelectElem, String] = {
-    case Column(c, Some(rename)) => s"""col("$c").as("$rename")"""
-    case Column(c, _) => s"""col("$c")"""
+    case Renamed(r, name) => s"""${translateRenameable(r)}.as("$name")"""
     case Star => """col("*")"""
+    case r: Renameable => translateRenameable(r)
+  }
+
+  def translateRenameable: PartialFunction[Renameable, String] = {
+    case Column(name) => s"""col("$name")"""
+    case NullTypedLiteral(litType) => s"""typedLit[Option[${translateType(litType)}]](None)"""
+    case TypedLiteral(lit, litType) => s"""typedLit[${translateType(litType)}]($lit)"""
+  }
+
+  def translateType: PartialFunction[LiteralType, String] = {
+    case VarChar => "String"
+    case Timestamp => "java.sql.Timestamp"
+    case BigInt => "java.math.BigInt"
   }
 
 }

@@ -13,11 +13,20 @@ package object parsers {
 
     override type Elem = SQLToken
 
+    def convertLitType: PartialFunction[LIT_TYPE, LiteralType] = {
+      case VARCHAR => VarChar
+      case TIMESTAMP => Timestamp
+      case BIGINT => BigInt
+    }
     def columns: Parser[List[SelectElem]] = {
       val star = STAR ^^ (_ => List(Star))
       val columnName: Parser[Column] = accept("column name", { case NAME(name) => Column(name) })
-      val columnRename: Parser[Column] = (columnName ~ AS ~ columnName) ^^ { case Column(name, _) ~ _ ~ Column(rename, _) => Column(name, Some(rename)) }
-      star | (columnRename | columnName).+
+      val typedLit: Parser[Literal] = accept("typed literal", {
+        case TYPED_LITERAL(NULL, litType) => NullTypedLiteral(convertLitType(litType))
+        case TYPED_LITERAL(LITERAL(lit), litType) => TypedLiteral(lit, convertLitType(litType))
+      })
+      val columnRename: Parser[Renamed] = ((columnName | typedLit) ~ AS ~ columnName) ^^ { case column ~ _ ~ Column(rename) => Renamed(column, rename) }
+      star | (columnRename | columnName | typedLit).+
     }
 
     def from: Parser[From] = {
@@ -29,7 +38,7 @@ package object parsers {
       (SELECT ~ columns ~ from) ^^ { case _ ~ cols ~ f => Select(cols, f) }
 
     def statement: Parser[StatementAst] =
-      phrase(select ^^ { case s => StatementAst(s) })
+      phrase(select ^^ { s => StatementAst(s) })
 
     def apply(tokens: Iterable[SQLToken]): Either[ParserError, StatementAst] = {
       val reader = new SQLReader(tokens)
