@@ -68,4 +68,22 @@ class SQLLexerTest extends FlatSpec with Matchers {
 
     expected shouldBe output
   }
+
+  "select with unrecognized token" should "add as NO_MATCH" in {
+    val input =
+      """
+        |select
+        |  null::varchar as name,
+        |  1::bigint,
+        |  someInvalid/UnsupportedThing(a + b = 3),
+        |  ad_id
+        |  from dw.table;
+      """.stripMargin
+
+    val output = SQLLexer.parse(SQLLexer.tokens, input).get
+
+    val expected = List[SQLToken](SELECT, TYPED_LITERAL(NULL, VARCHAR), AS, NAME("name"), TYPED_LITERAL(LITERAL("1"), BIGINT), NO_MATCH("someInvalid/UnsupportedThing(a + b = 3)"), NAME("ad_id"), FROM, NAME("dw.table"))
+
+    expected shouldBe output
+  }
 }

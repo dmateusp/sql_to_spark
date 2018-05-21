@@ -10,11 +10,11 @@ package object asts {
 
   sealed trait SelectElem
   case object Star extends SelectElem
+  case class NoMatch(text: String) extends SelectElem
 
   sealed trait Renameable
   case class Renamed(col: Renameable, name: String) extends SelectElem
   case class Column(name: String) extends SelectElem with Renameable
-
 
   sealed trait Literal extends SelectElem with Renameable
   case class TypedLiteral(lit: String, litType: LiteralType) extends Literal

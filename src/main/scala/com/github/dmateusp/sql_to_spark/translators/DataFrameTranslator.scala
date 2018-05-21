@@ -28,6 +28,7 @@ object DataFrameTranslator extends StatementAstTranslator {
   def translateSelectElem: PartialFunction[SelectElem, String] = {
     case Renamed(r, name) => s"""${translateRenameable(r)}.as("$name")"""
     case Star => """col("*")"""
+    case NoMatch(text) => s"// Could not match: $text"
     case r: Renameable => translateRenameable(r)
   }
 

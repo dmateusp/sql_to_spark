@@ -8,6 +8,10 @@ package object tokens {
   case object STAR extends SQLToken
   case object FROM extends SQLToken
   case object AS extends SQLToken
+  case object COMMA extends SQLToken
+  case object SEMICOLON extends SQLToken
+  case object EOF extends SQLToken
+  case class NO_MATCH(text: String) extends SQLToken
   case class TYPE(name: String) extends SQLToken
 
   trait LIT extends SQLToken

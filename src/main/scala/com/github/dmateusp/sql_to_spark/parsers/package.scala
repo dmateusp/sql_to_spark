@@ -19,14 +19,16 @@ package object parsers {
       case BIGINT => BigInt
     }
     def columns: Parser[List[SelectElem]] = {
-      val star = STAR ^^ (_ => List(Star))
+      val star = STAR ^^^ List(Star)
       val columnName: Parser[Column] = accept("column name", { case NAME(name) => Column(name) })
       val typedLit: Parser[Literal] = accept("typed literal", {
         case TYPED_LITERAL(NULL, litType) => NullTypedLiteral(convertLitType(litType))
         case TYPED_LITERAL(LITERAL(lit), litType) => TypedLiteral(lit, convertLitType(litType))
       })
       val columnRename: Parser[Renamed] = ((columnName | typedLit) ~ AS ~ columnName) ^^ { case column ~ _ ~ Column(rename) => Renamed(column, rename) }
-      star | (columnRename | columnName | typedLit).+
+      val noMatch: Parser[NoMatch] = accept("column no match", { case NO_MATCH(text) => NoMatch(text) })
+
+      star | (columnRename | columnName | typedLit | noMatch).+
     }
 
     def from: Parser[From] = {

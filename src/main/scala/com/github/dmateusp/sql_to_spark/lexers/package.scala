@@ -8,14 +8,19 @@ package object lexers {
 
   object SQLLexer extends RegexParsers {
 
-    override val whiteSpace = """[\s\n;,]+""".r
-
     def select: Parser[SELECT.type] = "select".r.ignoreCase ^^^ SELECT
-    def name: Parser[NAME] = """[a-z_]+\.?[a-z_]*""".r.ignoreCase ^^ (name => NAME(name.stripSuffix(",")))
-    def star: Parser[STAR.type] = """\*""".r ^^^ STAR
+    def name: Parser[NAME] = ("""[a-z_0-9]+\.?[a-z_0-9]*""".r.ignoreCase ^^ (
+      name => NAME(
+        name
+      ))) <~ (semiColon | comma | eof | guard(from | as))
+    def semiColon: Parser[SEMICOLON.type] = ";" ^^^ SEMICOLON
+    def comma: Parser[COMMA.type] = "," ^^^ COMMA
+    def eof: Parser[EOF.type] = not(".".r) ^^^ EOF
+    def star: Parser[STAR.type] = "*" ^^^ STAR
     def from: Parser[FROM.type] = "from".r.ignoreCase ^^^ FROM
     def as: Parser[AS.type] = "as".r.ignoreCase ^^^ AS
-    def typedLiteral: Parser[TYPED_LITERAL] = """[a-z0-9\-,\.]+::[a-z]+""".r.ignoreCase ^^ (
+    def noMatch: Parser[NO_MATCH] = """[^\n]+""".r ^^ (text => NO_MATCH(text))
+    def typedLiteral: Parser[TYPED_LITERAL] = ("""[a-z0-9\-,\.]+::[a-z]+""".r.ignoreCase ^^ (
         typedLit =>
           typedLit
             .split("::") match {
@@ -33,8 +38,8 @@ package object lexers {
               }
             }
           }
-      )
-    def tokens: Parser[List[SQLToken]] = rep1(select | star | from | as | typedLiteral | name)
+      )) <~ comma.?
+    def tokens: Parser[List[SQLToken]] = rep1(select | star | as |  from | typedLiteral | name | noMatch)
   }
 
 }
