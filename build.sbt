@@ -1,7 +1,9 @@
+import scala.sys.process._
+
 lazy val projectSettings = Seq(
   organization := "com.github.dmateusp",
   name := "sql_to_spark",
-  scalaVersion := "2.12.4",
+  scalaVersion := "2.12.10",
   version := "git describe --tags --dirty --always".!!.stripPrefix("v").trim
 )
 
